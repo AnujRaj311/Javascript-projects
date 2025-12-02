@@ -58,7 +58,7 @@ const renderCountry = function(data, className = '') {
         </article>
     `
     countriesContainer.insertAdjacentHTML('beforeend', html);
-    // countriesContainer.style.opacity = 1;
+    countriesContainer.style.opacity = 1;
 
 }
 
@@ -160,5 +160,115 @@ const getCountryData = function(country) {
 }
 
 btn.addEventListener('click', function() {
-    getCountryData('australia');
+    getCountryData('portugal');
 })
+
+//Event loop in practice
+
+// console.log('Test start');
+// setTimeout(()=> {
+//     console.log('Test after 0 sec');
+// }, 0);
+// Promise.resolve('Promise 1 resolve')
+// .then((response)=> {
+//     console.log(response);
+// });
+// Promise.resolve('Promise 2 resolve')
+// .then((response)=> {
+//     for(let i=0; i<1000000000; i++) {}
+//     console.log(response);
+// });
+// console.log('Test end');
+
+
+//Creating a promise
+const lottery = new Promise(function(resolve, reject) {
+    console.log('Lottery Draw is happening');
+    setTimeout(function(){
+        if(Math.random() >=0.5) {
+            resolve('You win the lottery')
+        } else {
+            reject(new Error('You lose the lottery'))
+        }
+    }, 5000)
+})
+
+lottery.then((res)=> {
+    console.log(res);
+})
+.catch((err)=> {
+    console.error(err);
+})
+
+//Promisifying the setTimeout function
+const wait = function(seconds) {
+    return new Promise(function(resolve) {
+        setTimeout(resolve, seconds*1000)
+    })
+}
+
+wait(2).then(()=> {
+    console.log('I waited for 2 seconds');
+})
+
+//Async/Await
+const whereYouAre = async function (country) {
+    try {
+        const res = await fetch(`https://countries-api-836d.onrender.com/countries/name/${country}`);
+        const data = await res.json();
+        renderCountry(data[0]);
+        return `Germanyyyy`;
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+whereYouAre('germany');
+console.log('FIRST');
+
+//try...catch
+try {
+    let y = 1;
+    const x = 2;
+    x = 3;
+} catch(err) {
+    console.error(err.message);
+}
+
+console.log('1: getting my location');
+
+
+//IIFE function call with a async function returning the value
+(async function(){
+   try {
+        const res = await whereYouAre('germany');
+    console.log(`2: I am in ${res}`);
+} catch(err) {
+    console.error(`2: ${err.message}`) 
+}
+console.log('3: Location finished');
+}) ();
+
+//Runnning promises in parallel
+const get3CountiesCapital = async function (c1, c2, c3) {
+    try { 
+        // const [data1] = await getJSON(`https://countries-api-836d.onrender.com/countries/name/${c1}`);
+        // const [data2] = await getJSON(`https://countries-api-836d.onrender.com/countries/name/${c2}`);
+        // const [data3] = await getJSON(`https://countries-api-836d.onrender.com/countries/name/${c3}`);
+
+        // console.log([data1.capital, data2.capital, data3.capital]);
+
+        const data = await Promise.all([getJSON(`https://countries-api-836d.onrender.com/countries/name/${c1}`),
+        getJSON(`https://countries-api-836d.onrender.com/countries/name/${c2}`),
+        getJSON(`https://countries-api-836d.onrender.com/countries/name/${c3}`)])
+
+        console.log(data.map((d) => {
+            return d[0].capital
+        }));
+    } catch (err) {
+        console.error(err);
+    }
+
+}
+
+get3CountiesCapital('portugal', 'canada', 'spain')
